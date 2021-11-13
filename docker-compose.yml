@@ -1,0 +1,31 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:11
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: piper
+      POSTGRES_USER: piper
+      POSTGRES_PASSWORD: piper
+    ports:
+      - "5432:5432"
+
+
+  piper:
+    image: creactiviti/piper
+    ports:
+      - "8080:8080"
+    environment:
+      spring.datasource.url: jdbc:postgresql://postgres:5432/piper
+      spring.datasource.initialization-mode: always
+      logging.level.com.creactiviti: INFO
+      piper.worker.enabled: "true"
+      piper.coordinator.enabled: "true"
+      piper.worker.subscriptions.tasks: 1
+      piper.pipeline-repository.filesystem.enabled: "true"
+      piper.pipeline-repository.filesystem.location-pattern: /pipelines/**/*.yaml
+
+    volumes:
+      - .:/pipelines
+    depends_on:
+      - postgres
